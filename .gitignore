@@ -102,3 +102,10 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Config files
+src/config
+
+# VSCode files
+.vscode
+pnpm-lock.yaml

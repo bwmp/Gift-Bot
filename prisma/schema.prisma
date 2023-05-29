@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model licenses {
+  license_key String @unique(map: "licenseKey")
+  userId String
+  product String
+}
+
+model blacklist {
+  userId String @unique(map: "userId")
+  reason String
+}
+
+model levels {
+  userId String @unique(map: "userId")
+  level Int @default(1)
+  xp Int @default(0)
+  xp_needed Int @default(66)
+}

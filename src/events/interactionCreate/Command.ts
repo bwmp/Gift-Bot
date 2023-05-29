@@ -16,7 +16,7 @@ export default async (client: Client, interaction: CommandInteraction) => {
         return interaction.editReply({content: "This command can only be used by the bot creator"})
     }
     try {
-        await command.execute(interaction, args, client);
+        await command.execute(interaction, args);
     } catch (error) {
         console.error(error);
         await interaction.editReply({ content: 'There was an error while executing this command!' });
