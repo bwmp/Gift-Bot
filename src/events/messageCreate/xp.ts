@@ -19,7 +19,6 @@ export default async (client: Client, message: Message) => {
 
   try {
     const newXp = await addXp(userId, xpAmount);
-    message.reply(`You gained ${xpAmount} XP!`);
     if (newXp.leveledUp) {
       const user = client.users.cache.get(userId);
       const reward = rewards[String(newXp.leveledUp) as keyof typeof rewards];

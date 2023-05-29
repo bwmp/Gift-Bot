@@ -56,7 +56,7 @@ export async function addXp(userId: string, xp: number) {
         });
 
         const newXp = user.xp + xp;
-        logger.info(`New xp: ${newXp}`);
+        
         if (newXp >= user.xp_needed) {
             const newLevel = user.level + 1;
             const newXpNeeded = calculateXpNeeded(newLevel);
