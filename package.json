@@ -4,6 +4,7 @@
   "description": "easy to use bot template",
   "main": "src/index.ts",
   "scripts": {
+    "start": "git pull && pnpm i && prisma generate && ts-node --transpileOnly src/index.ts",
     "test": "nodemon src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
