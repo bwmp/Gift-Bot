@@ -1,8 +1,8 @@
-import { Command } from '~/types/Objects';
+import { Command } from '~/types/objects';
 
 export const ping: Command = {
 	description: "Pong!",
 	execute: function (interaction, args) {
-		interaction.editReply({content: "Pong!"})
+		interaction.editReply({ content: "Pong!" })
 	}
 }

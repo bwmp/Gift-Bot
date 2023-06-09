@@ -108,4 +108,3 @@ src/config
 
 # VSCode files
 .vscode
-pnpm-lock.yaml

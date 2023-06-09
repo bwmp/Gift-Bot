@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import { Command } from '~/types/Objects';
+import { Command } from '~/types/objects';
+import prisma from '~/functions/database';
 
 export const getuserbykey: Command = {
   description: "gets a user by their license key",
@@ -7,9 +7,8 @@ export const getuserbykey: Command = {
   ephemeral: true,
   ownerOnly: true,
   execute: async function (interaction, args) {
-    const prisma = new PrismaClient();
     const key = args.getString("license_key", true);
-    
+
     const user = await prisma.licenses.findUnique({
       where: { license_key: key },
     });

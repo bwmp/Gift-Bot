@@ -1,11 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+logger.info("Prisma client initialized");
+
 export async function addLicenseKey(
     userId: string,
     licenseKey: string,
     product: string
 ) {
-    const prisma = new PrismaClient();
 
     const result = await prisma.licenses.upsert({
         where: {
@@ -25,7 +27,6 @@ export async function addLicenseKey(
 }
 
 export async function deleteLicenseKey(licenseKey: string) {
-    const prisma = new PrismaClient();
     prisma.licenses.delete({
         where: {
             license_key: licenseKey,
@@ -35,7 +36,6 @@ export async function deleteLicenseKey(licenseKey: string) {
 }
 
 export async function addXp(userId: string, xp: number) {
-    const prisma = new PrismaClient();
     const result = { leveledUp: false, newLevel: 0 };
 
     await prisma.$transaction(async (tx) => {
@@ -56,7 +56,7 @@ export async function addXp(userId: string, xp: number) {
         });
 
         const newXp = user.xp + xp;
-        
+
         if (newXp >= user.xp_needed) {
             const newLevel = user.level + 1;
             const newXpNeeded = calculateXpNeeded(newLevel);
@@ -81,7 +81,6 @@ export async function addXp(userId: string, xp: number) {
 }
 
 export async function getXp(userId: string) {
-    const prisma = new PrismaClient();
     const user = await prisma.levels.upsert({
         where: {
             userId: userId,
@@ -97,7 +96,6 @@ export async function getXp(userId: string) {
 }
 
 export async function getTopUsers(limit: number) {
-    const prisma = new PrismaClient();
     const users = await prisma.levels.findMany({
         orderBy: {
             xp: "desc",
@@ -111,3 +109,6 @@ export async function getTopUsers(limit: number) {
 function calculateXpNeeded(level: number) {
     return Math.floor(Math.pow(level / 0.015, 1));
 }
+
+
+export default prisma;

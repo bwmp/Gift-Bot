@@ -41,14 +41,13 @@ export class Modal {
   name?: string;
   deferReply?: boolean;
   ephemeral?: boolean;
-  execute: (interaction: ModalSubmitInteraction, client: Client, modalInfo: string) => void | Promise<void>;
+  execute: (interaction: ModalSubmitInteraction, args: ModalSubmitFields) => void | Promise<void>;
 }
 
 export class Button {
   name?: string;
-  botPerms?: (keyof typeof PermissionsBitField.Flags)[];
   deferReply?: boolean;
   noDefer?: boolean;
   ephemeral?: boolean;
-  execute: (interaction: ButtonInteraction | StringSelectMenuInteraction, client: Client) => void | Promise<void>;
+  execute: (interaction: ButtonInteraction | StringSelectMenuInteraction, args: string[]) => void | Promise<void>;
 }

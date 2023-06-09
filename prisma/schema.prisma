@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -13,8 +13,8 @@ datasource db {
 
 model licenses {
   license_key String @unique(map: "licenseKey")
-  userId String
-  product String
+  userId      String
+  product     String
 }
 
 model blacklist {
@@ -23,8 +23,18 @@ model blacklist {
 }
 
 model levels {
-  userId String @unique(map: "userId")
-  level Int @default(1)
-  xp Int @default(0)
-  xp_needed Int @default(66)
+  userId    String @unique(map: "userId")
+  level     Int    @default(1)
+  xp        Int    @default(0)
+  xp_needed Int    @default(66)
+}
+
+model ticketdata {
+  id              Int     @id @default(autoincrement())
+  userId          String
+  channelID       String  @unique(map: "channelID")
+  ticketReason    String
+  open            Boolean @default(true)
+  users           String  @default("[]")
+  originalMessage String  @default("")
 }

@@ -1,4 +1,4 @@
-import { Channel, Client, StageChannel, TextChannel, VoiceChannel } from 'discord.js';
+import { Client, StageChannel, TextChannel, VoiceChannel } from 'discord.js';
 
 export default async (client: Client) => {
   setInterval(async () => {

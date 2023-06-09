@@ -29,15 +29,17 @@
     "@types/node": "^20.1.1",
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",
+    "prisma": "^4.15.0",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.0.4",
     "winston": "^3.8.2"
   },
   "dependencies": {
+    "@devmehq/open-graph-extractor": "^1.0.4",
     "@napi-rs/canvas": "^0.1.41",
-    "@prisma/client": "^4.14.0",
-    "node-fetch": "^3.3.1",
-    "prisma": "^4.14.0"
+    "@prisma/client": "^4.15.0",
+    "discord-html-transcripts": "^3.1.4",
+    "node-fetch": "^3.3.1"
   }
 }
