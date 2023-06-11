@@ -1,37 +1,52 @@
 import { Button } from '~/types/objects';
-import prisma from '~/functions/database';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, PermissionsBitField, TextChannel } from 'discord.js';
+import prisma, { getSettings } from '~/functions/database';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CategoryChannel, EmbedBuilder, GuildMember, PermissionsBitField, TextChannel } from 'discord.js';
 import { createTranscript } from 'discord-html-transcripts';
 
 export const close: Button = {
   deferReply: true,
   ephemeral: true,
   execute: async function (interaction, args) {
-    let ticketData = await prisma.ticketdata.findUnique({
+
+    const settings = await getSettings(interaction.guild!.id);
+
+    let ticketInfo = await prisma.ticketdata.findUnique({
       where: {
         channelID: interaction.channel!.id
       }
     });
 
-    if (!ticketData) {
+    const supportRole = await interaction.guild!.roles.fetch(settings.ticketdata.supportRole);
+    const member = interaction.member as GuildMember;
+    const isSupport = supportRole?.members.some(member => member.id === interaction.user.id) || member.permissions.has(PermissionsBitField.Flags.Administrator);
+
+    if (!ticketInfo) {
       interaction.editReply({
         content: 'This channel is not a ticket!'
       });
       return;
     }
 
-    const member = interaction.member as GuildMember;
+    if(!ticketInfo.open){
+      interaction.editReply({
+        content: 'This ticket is already closed!'
+      });
+      return;
+    }
 
-    if (ticketData.userId !== interaction.user.id || !member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
+    if (ticketInfo.userId !== interaction.user.id || !isSupport) {
       interaction.editReply({
         content: 'You cannot close this ticket!'
       });
       return;
     }
 
-    ticketData = await prisma.ticketdata.update({
+    ticketInfo = await prisma.ticketdata.update({
       where: {
-        channelID: interaction.channel!.id
+        guildId_id: {
+          guildId: interaction.guild!.id,
+          id: ticketInfo.id
+        }
       },
       data: {
         open: false
@@ -71,7 +86,7 @@ export const close: Button = {
       ])
 
     await interaction.editReply({
-      components: [ogmsgRow]
+      content: 'Ticket closed!',
     });
 
     await interaction.channel!.send({
@@ -79,44 +94,62 @@ export const close: Button = {
       components: [row]
     });
 
-    const channel = await interaction.guild!.channels.fetch(ticketData.channelID);
+    const ogMsg = await interaction.channel!.messages.fetch(ticketInfo.originalMessage);
 
-    channel?.edit({
-      parent: process.env.CLOSED_TICKET_CATEGORY as string
+    await ogMsg.edit({
+      components: [ogmsgRow]
     });
 
-    const LogChannel = interaction.guild!.channels.cache.get(process.env.TICKET_LOG_CHANNEL as string) as TextChannel;
+    const channel = await interaction.guild!.channels.fetch(ticketInfo.channelID);
+
+    let parent = null;
+    if (settings.ticketdata.categories.closed == "false"){
+        parent = null
+    }else{
+        parent = await interaction.guild!.channels.fetch(settings.ticketdata.categories.closed) as CategoryChannel | undefined;
+    }
+
+    channel?.edit({
+      parent: parent ? parent.id : null,
+    });
+
+    let LogChannel = null;
+    if (settings.ticketdata.logChannel == "false"){
+      LogChannel = null
+    }else{
+      LogChannel = await interaction.guild!.channels.fetch(settings.ticketdata.logChannel) as TextChannel;
+    }
 
     const logEmbed = new EmbedBuilder()
-    .setTitle('Ticket Closed')
-    .addFields(
-      {
-        name: 'Ticket ID',
-        value: ticketData.id.toString(),
-      },
-      {
-        name: 'Ticket Owner',
-        value: `<@${ticketData.userId}>`,
-      },
-      {
-        name: 'Closed By',
-        value: `<@${interaction.user.id}>`,
-      }
-    )
-    .setColor('#ff0000')
-    .setTimestamp();
+      .setTitle('Ticket Closed')
+      .addFields(
+        {
+          name: 'Ticket ID',
+          value: ticketInfo.id.toString(),
+        },
+        {
+          name: 'Ticket Owner',
+          value: `<@${ticketInfo.userId}>`,
+        },
+        {
+          name: 'Closed By',
+          value: `<@${interaction.user.id}>`,
+        }
+      )
+      .setColor('#ff0000')
+      .setTimestamp();
 
-    await LogChannel.send({
+    await LogChannel?.send({
       embeds: [logEmbed],
       files: [transcript]
     });
 
-    const users = JSON.parse(ticketData.users);
+    const users = JSON.parse(ticketInfo.users);
 
-    const creatordm = await interaction.guild!.members.cache.get(ticketData.userId)?.createDM();
+    const creator = interaction.guild!.members.cache.get(ticketInfo.userId);
 
-    if (creatordm) {
-      await creatordm.send({
+    if (creator) {
+      await creator.send({
         embeds: [embed],
         files: [transcript]
       });

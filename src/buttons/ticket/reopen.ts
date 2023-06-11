@@ -1,33 +1,46 @@
 import { Button } from '~/types/objects';
-import prisma from '~/functions/database';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, Message, PermissionsBitField, TextChannel } from 'discord.js';
+import prisma, { getSettings } from '~/functions/database';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CategoryChannel, EmbedBuilder, GuildMember, Message, PermissionsBitField, TextChannel } from 'discord.js';
+
 export const reopen: Button = {
   deferReply: true,
   ephemeral: true,
   execute: async function (interaction, args) {
-    let ticketData = await prisma.ticketdata.findUnique({
+
+    const settings = await getSettings(interaction.guild!.id);
+
+    let ticketInfo = await prisma.ticketdata.findUnique({
       where: {
         channelID: interaction.channel!.id
       }
     });
 
-    if (!ticketData) {
+    if (!ticketInfo) {
       interaction.editReply({
         content: 'This channel is not a ticket!'
       });
       return;
     }
 
-    const member = interaction.member as GuildMember;
+    if (ticketInfo.open) {
+      interaction.editReply({
+        content: 'This ticket is already open!'
+      });
+      return;
+    }
 
-    if (ticketData.userId !== interaction.user.id || !member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
+    const supportRole = await interaction.guild!.roles.fetch(settings.ticketdata.supportRole);
+    const member = interaction.member as GuildMember;
+    const isSupport = supportRole?.members.some(member => member.id === interaction.user.id) || member.permissions.has(PermissionsBitField.Flags.Administrator);
+
+    if (ticketInfo.userId !== interaction.user.id || !isSupport) {
       interaction.editReply({
         content: 'You cannot reopen this ticket!'
       });
       return;
     }
 
-    ticketData = await prisma.ticketdata.update({
+    ticketInfo = await prisma.ticketdata.update({
       where: {
         channelID: interaction.channel!.id
       },
@@ -51,7 +64,7 @@ export const reopen: Button = {
           .setStyle(ButtonStyle.Danger)
           .setDisabled(false)
       ])
-    const originalMessage = await interaction.channel?.messages.fetch(ticketData.originalMessage) as Message;
+    const originalMessage = await interaction.channel?.messages.fetch(ticketInfo.originalMessage) as Message;
     await originalMessage.edit({
       components: [ogmsgRow]
     });
@@ -77,25 +90,34 @@ export const reopen: Button = {
           .setDisabled(true)
       ])
 
-    await interaction.editReply({
-      content: 'Ticket Reopened!',
-      components: [row]
-    });
+    await interaction.message.delete();
 
-    const channel = await interaction.guild!.channels.fetch(ticketData.channelID);
+    const channel = await interaction.guild!.channels.fetch(ticketInfo.channelID);
+
+    let parent = null;
+    if (settings.ticketdata.categories.open == "false"){
+        parent = null
+    }else{
+        parent = await interaction.guild!.channels.fetch(settings.ticketdata.categories.open) as CategoryChannel | undefined;
+    }
 
     channel?.edit({
-      parent: process.env.TICKET_CATEGORY as string
+      parent: parent ? parent.id : null,
     });
 
-    const LogChannel = interaction.guild!.channels.cache.get(process.env.TICKET_LOG_CHANNEL as string) as TextChannel;
+    let LogChannel = null;
+    if (settings.ticketdata.logChannel == "false"){
+      LogChannel = null
+    }else{
+      LogChannel = await interaction.guild!.channels.fetch(settings.ticketdata.logChannel) as TextChannel;
+    }
 
     const logEmbed = new EmbedBuilder()
       .setTitle('Ticket Reopened')
       .addFields(
         {
           name: 'Ticket',
-          value: `<#${ticketData.channelID}>`
+          value: `<#${ticketInfo.channelID}>`
         },
         {
           name: 'Reopened By',
@@ -103,13 +125,13 @@ export const reopen: Button = {
         },
         {
           name: 'Ticket ID',
-          value: `${ticketData.id}`
+          value: `${ticketInfo.id}`
         }
       )
       .setColor('#00ff00')
       .setTimestamp();
 
-    await LogChannel.send({
+    await LogChannel?.send({
       embeds: [logEmbed]
     });
 

@@ -1,11 +1,13 @@
 import { Command } from '~/types/objects';
 import wishlistOptions from '~/options/wishlist';
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, TextChannel } from 'discord.js';
 import { extractOpenGraph } from '@devmehq/open-graph-extractor';
+import { getSettings } from '~/functions/database';
 
 export const wishlist: Command = {
     description: "adds something to your wishlist",
     ownerOnly: false,
+    permissions: ["Administrator"],
     ephemeral: true,
     options: wishlistOptions,
     execute: async function (interaction, args) {
@@ -13,6 +15,10 @@ export const wishlist: Command = {
         const price = args.getString("price", true);
         const reward = args.getString("reward", false);
         const extra = args.getString("extra", false);
+
+        const settings = await getSettings(interaction.guild!.id);
+
+        const wishlistChannel = interaction.guild?.channels.cache.get(settings.wishlistchannel) as TextChannel || interaction.channel as TextChannel;
 
         const hmtl = await fetch(link).then(res => res.text());
         const embedData = extractOpenGraph(hmtl);
@@ -30,6 +36,6 @@ export const wishlist: Command = {
 
         interaction.editReply({ content: "Added to wishlist!", embeds: [embed] });
 
-        interaction.channel?.send({ embeds: [embed] });
+        wishlistChannel?.send({ embeds: [embed] });
     }
 }

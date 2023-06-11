@@ -1,5 +1,6 @@
 import { AttachmentBuilder, Client, GuildMember, TextChannel } from "discord.js";
 import Canvas from "@napi-rs/canvas";
+import { getSettings } from "~/functions/database";
 
 
 Canvas.GlobalFonts.registerFromPath('./src/assets/fonts/NexaScript-Trial-Regular.ttf', 'NexaScript');
@@ -17,7 +18,10 @@ const applyText = (canvas: Canvas.Canvas, text: string) => {
 };
 
 export default async (client: Client, member: GuildMember) => {
-  const channel = member.guild.channels.cache.get(process.env.GOODBYE_CHANNEL as string) as TextChannel;
+  
+  const settings = await getSettings(member.guild.id);
+
+  const channel = member.guild.channels.cache.get(settings.leavemessage.channel) as TextChannel;
 
   if (!channel) return;
 

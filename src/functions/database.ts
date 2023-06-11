@@ -1,7 +1,35 @@
 import { PrismaClient } from "@prisma/client";
+import { join_leaveMessage, ticketdata } from "~/interfaces/database";
 
 const prisma = new PrismaClient();
 logger.info("Prisma client initialized");
+
+export async function getSettings(guildId: string){
+    let settings = await prisma.settings.findUnique({
+        where: {
+            guildId: guildId,
+        },
+    });
+
+    if(!settings){
+        settings = await prisma.settings.create({
+            data: {
+                guildId: guildId,
+            },
+        });
+    }
+
+    const joinmessage = JSON.parse(settings.joinmessage || '{}') as join_leaveMessage;
+    const leavemessage = JSON.parse(settings.leavemessage || '{}') as join_leaveMessage;
+    const ticketdata = JSON.parse(settings.ticketdata || '{}') as ticketdata;
+    const membercountchannel = settings.membercountchannel
+    const wishlistchannel = settings.wishlistchannel
+    const ticketId = settings.ticketId
+
+    await prisma.$disconnect();
+
+    return { joinmessage, leavemessage, ticketdata, membercountchannel, wishlistchannel, ticketId };
+}
 
 export async function addLicenseKey(
     userId: string,
@@ -35,15 +63,19 @@ export async function deleteLicenseKey(licenseKey: string) {
     prisma.$disconnect();
 }
 
-export async function addXp(userId: string, xp: number) {
+export async function addXp(userId: string, guildId: string, xp: number) {
     const result = { leveledUp: false, newLevel: 0 };
 
     await prisma.$transaction(async (tx) => {
         let user = await tx.levels.upsert({
             where: {
-                userId: userId,
+                userId_guildId: {
+                    userId: userId,
+                    guildId: guildId,
+                },
             },
             create: {
+                guildId: guildId,
                 userId: userId,
                 xp: xp,
                 level: 1,
@@ -62,7 +94,10 @@ export async function addXp(userId: string, xp: number) {
             const newXpNeeded = calculateXpNeeded(newLevel);
             await tx.levels.update({
                 where: {
-                    userId: userId,
+                    userId_guildId: {
+                        userId: userId,
+                        guildId: guildId,
+                    },
                 },
                 data: {
                     xp: 0,
@@ -80,13 +115,17 @@ export async function addXp(userId: string, xp: number) {
     return result;
 }
 
-export async function getXp(userId: string) {
+export async function getXp(userId: string, guildId: string) {
     const user = await prisma.levels.upsert({
         where: {
-            userId: userId,
+            userId_guildId: {
+                userId: userId,
+                guildId: guildId,
+            },
         },
         create: {
             userId: userId,
+            guildId: guildId,
         },
         update: {},
     });
@@ -95,8 +134,11 @@ export async function getXp(userId: string) {
     return user;
 }
 
-export async function getTopUsers(limit: number) {
+export async function getTopUsers(guildId: string, limit: number) {
     const users = await prisma.levels.findMany({
+        where: {
+            guildId: guildId,
+        },
         orderBy: {
             xp: "desc",
         },
@@ -109,6 +151,5 @@ export async function getTopUsers(limit: number) {
 function calculateXpNeeded(level: number) {
     return Math.floor(Math.pow(level / 0.015, 1));
 }
-
 
 export default prisma;

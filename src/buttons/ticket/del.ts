@@ -1,26 +1,28 @@
 import { EmbedBuilder, TextChannel } from 'discord.js';
 import { Button } from '~/types/objects';
-import prisma from '~/functions/database';
+import prisma, { getSettings } from '~/functions/database';
 
 export const del: Button = {
   noDefer: true,
   ephemeral: true,
   execute: async function (interaction, args) {
 
-    const ticketData = await prisma.ticketdata.findUnique({
+    const settings = await getSettings(interaction.guild!.id);
+
+    const ticketInfo = await prisma.ticketdata.findUnique({
       where: {
         channelID: interaction.channel!.id
       }
     });
 
-    if (!ticketData) {
+    if (!ticketInfo) {
       interaction.editReply({
         content: 'This channel is not a ticket!'
       });
       return;
     }
 
-    if (ticketData.open) {
+    if (ticketInfo.open) {
       interaction.editReply({
         content: 'Please close the ticket before deleting it!'
       });
@@ -29,7 +31,7 @@ export const del: Button = {
 
     interaction.channel?.delete();
 
-    const channel = interaction.guild?.channels.cache.get(process.env.TICKET_LOG_CHANNEL as string) as TextChannel;
+    const channel = interaction.guild?.channels.cache.get(settings.ticketdata.logChannel) as TextChannel;
 
     const embed = new EmbedBuilder()
       .setTitle('Ticket Deleted')
@@ -37,12 +39,12 @@ export const del: Button = {
       .addFields(
         {
           name: 'Ticket creator',
-          value: `<@${ticketData.userId}>`,
+          value: `<@${ticketInfo.userId}>`,
           inline: true
         },
         {
           name: 'Ticket ID',
-          value: `${ticketData.id}`,
+          value: `${ticketInfo.id}`,
         }
       )
       .setColor('#ff0000')

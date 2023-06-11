@@ -4,9 +4,8 @@ export class Command {
   name?: string;
   description: string;
   category?: string;
-  aliases?: string[];
   usage?: string;
-  args?: boolean;
+  guildOnly?: boolean;
   permissions?: (keyof typeof PermissionsBitField.Flags)[];
   channelPermissions?: (keyof typeof PermissionsBitField.Flags)[];
   botPerms?: (keyof typeof PermissionsBitField.Flags)[];

@@ -5,8 +5,9 @@ import { Command } from '~/types/objects';
 export const leaderboard: Command = {
     description: "display the level leaderboard",
     category: "levels",
+    guildOnly: true,
     execute: async function (interaction, args) {
-        const rows = await getTopUsers(10);
+        const rows = await getTopUsers(interaction.guild!.id, 10);
         const fields = [];
 
         const embed = new EmbedBuilder()

@@ -6,9 +6,6 @@ export const create: Button = {
     ephemeral: true,
     execute: async function (interaction, args) {
 
-        const verifiedRole = interaction.guild?.roles.cache.get("969015422160633866");
-        const unverifiedRole = interaction.guild?.roles.cache.get("968317142351118346");
-
         const member = interaction.member as GuildMember;
 
         if(member?.roles.cache.has("969015422160633866")) {
@@ -50,7 +47,6 @@ export const create: Button = {
                 new ButtonBuilder()
                     .setCustomId(`ageverify_deny-${interaction.user.id}`)
                     .setLabel('Deny')
-                    .setEmoji('❌')
                     .setStyle(ButtonStyle.Danger),
             ])
 
