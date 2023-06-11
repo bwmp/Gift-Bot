@@ -4,7 +4,7 @@ import { join_leaveMessage, joinleaveImage, ticketdata } from "~/interfaces/data
 const prisma = new PrismaClient();
 logger.info("Prisma client initialized");
 
-export async function getSettings(guildId: string){
+export async function getSettings(guildId: string) {
     const settings = await prisma.settings.upsert({
         where: {
             guildId: guildId,
@@ -141,6 +141,20 @@ export async function getTopUsers(guildId: string, limit: number) {
 
 function calculateXpNeeded(level: number) {
     return Math.floor(Math.pow(level / 0.015, 1));
+}
+
+export function formatOrdinalNumber(number: number): string {
+    const suffixes = ["th", "st", "nd", "rd"];
+    const remainder = number % 100;
+
+    // If the remainder is between 11 and 13, use "th" suffix
+    if (remainder >= 11 && remainder <= 13) {
+        return number + "th";
+    }
+
+    // Otherwise, use the appropriate suffix based on the last digit
+    const lastDigit = number % 10;
+    return number + (suffixes[lastDigit] || "th");
 }
 
 export default prisma;

@@ -1,6 +1,6 @@
 import { AttachmentBuilder, Client, GuildMember, TextChannel } from "discord.js";
 import Canvas from "@napi-rs/canvas";
-import { getSettings } from "~/functions/database";
+import { formatOrdinalNumber, getSettings } from "~/functions/database";
 
 
 Canvas.GlobalFonts.registerFromPath('./src/assets/fonts/NexaScript-Trial-Regular.ttf', 'NexaScript');
@@ -71,6 +71,13 @@ export default async (client: Client, member: GuildMember) => {
 
   const attachment = new AttachmentBuilder(await canvas.encode("webp"), { name: "welcome.png" });
 
-  channel.send({ files: [attachment] });
+  const msg = settings.joinmessage.message
+  .replace("{USER MENTION}", `<@${member.user.id}>`)
+  .replace("{USERNAME}", member.user.username)
+  .replace("{SERVER NAME}", member.guild.name)
+  .replace("{NUMBER}", member.guild.memberCount.toString())
+  .replace("{NUMBER FORMATTED}", formatOrdinalNumber(member.guild.memberCount))
+
+  channel.send({ content: msg, files: [attachment] });
 
 };
