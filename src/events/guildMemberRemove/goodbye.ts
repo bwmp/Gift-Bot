@@ -30,30 +30,32 @@ export default async (client: Client, member: GuildMember) => {
 
   const text = member.user.username
 
-  ctx.fillStyle = "#0d0d0d";
+  ctx.fillStyle = settings.leaveimage.backgroundColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const cat = await Canvas.loadImage(
-    "./src/assets/images/cat.png"
-  );
+  if (settings.leaveimage.image.startsWith("http")) {
+    const cat = await Canvas.loadImage(settings.leaveimage.image);
 
-  ctx.drawImage(cat, 500, canvas.height - 200, 200, 200);
-  //flip cat image horizontally and put it on the left side
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(cat, -100, canvas.height - 100, 100, 100);
-  ctx.restore();
+    ctx.drawImage(cat, 0, canvas.height - 100, 100, 100);
 
-  ctx.shadowColor = "#7c4b8b";
-  ctx.shadowBlur = 8;
-  ctx.shadowOffsetX = 5;
-  ctx.shadowOffsetY = 5;
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(cat, -700, canvas.height - 200, 200, 200);
+    ctx.restore();
+  }
+
+  if (settings.leaveimage.shadow === "true") {
+    ctx.shadowColor = settings.leaveimage.shadowColor;
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+  }
 
   ctx.font = "45px NexaScript";
-  ctx.fillStyle = "#f0ccfb";
+  ctx.fillStyle = settings.leaveimage.textColor;
   ctx.fillText("Goodbye", canvas.width / 2.75, canvas.height / 2.25);
   ctx.font = applyText(canvas, text);
-  ctx.fillStyle = "#f0ccfb";
+  ctx.fillStyle = settings.leaveimage.textColor;
   ctx.fillText(text, canvas.width / 2.75, canvas.height / 1.5);
 
   ctx.shadowColor = "transparent";

@@ -1,34 +1,30 @@
 import { PrismaClient } from "@prisma/client";
-import { join_leaveMessage, ticketdata } from "~/interfaces/database";
+import { join_leaveMessage, joinleaveImage, ticketdata } from "~/interfaces/database";
 
 const prisma = new PrismaClient();
 logger.info("Prisma client initialized");
 
 export async function getSettings(guildId: string){
-    let settings = await prisma.settings.findUnique({
+    const settings = await prisma.settings.upsert({
         where: {
             guildId: guildId,
         },
+        create: {
+            guildId: guildId,
+        },
+        update: {},
     });
 
-    if(!settings){
-        settings = await prisma.settings.create({
-            data: {
-                guildId: guildId,
-            },
-        });
-    }
-
     const joinmessage = JSON.parse(settings.joinmessage || '{}') as join_leaveMessage;
+    const joinimage = JSON.parse(settings.joinimage || '{}') as joinleaveImage;
     const leavemessage = JSON.parse(settings.leavemessage || '{}') as join_leaveMessage;
+    const leaveimage = JSON.parse(settings.leaveimage || '{}') as joinleaveImage;
     const ticketdata = JSON.parse(settings.ticketdata || '{}') as ticketdata;
     const membercountchannel = settings.membercountchannel
     const wishlistchannel = settings.wishlistchannel
     const ticketId = settings.ticketId
 
-    await prisma.$disconnect();
-
-    return { joinmessage, leavemessage, ticketdata, membercountchannel, wishlistchannel, ticketId };
+    return { joinmessage, joinimage, leavemessage, leaveimage, ticketdata, membercountchannel, wishlistchannel, ticketId };
 }
 
 export async function addLicenseKey(
@@ -49,8 +45,6 @@ export async function addLicenseKey(
         update: {},
     });
 
-    await prisma.$disconnect();
-
     return result ? true : false;
 }
 
@@ -60,7 +54,6 @@ export async function deleteLicenseKey(licenseKey: string) {
             license_key: licenseKey,
         },
     });
-    prisma.$disconnect();
 }
 
 export async function addXp(userId: string, guildId: string, xp: number) {
@@ -111,7 +104,6 @@ export async function addXp(userId: string, guildId: string, xp: number) {
         }
     });
 
-    await prisma.$disconnect();
     return result;
 }
 
@@ -130,7 +122,6 @@ export async function getXp(userId: string, guildId: string) {
         update: {},
     });
 
-    await prisma.$disconnect();
     return user;
 }
 
@@ -144,7 +135,7 @@ export async function getTopUsers(guildId: string, limit: number) {
         },
         take: limit,
     });
-    prisma.$disconnect();
+
     return users;
 }
 

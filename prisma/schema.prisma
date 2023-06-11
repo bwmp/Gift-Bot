@@ -30,7 +30,9 @@ model licenses {
 model settings {
   guildId            String @unique(map: "guildId")
   leavemessage       String @default("{\"message\":\"\",\"channel\":\"false\"}")
+  leaveimage         String @default("{\"backgroundColor\":\"#0d0d0d\",\"image\":\"\",\"textColor\":\"#f0ccfb\",\"shadow\":\"true\",\"shadowColor\":\"#7c4b8b\"}") @db.LongText
   joinmessage        String @default("{\"message\":\"\",\"channel\":\"false\"}")
+  joinimage          String @default("{\"backgroundColor\":\"#0d0d0d\",\"image\":\"\",\"textColor\":\"#f0ccfb\",\"shadow\":\"true\",\"shadowColor\":\"#7c4b8b\"}") @db.LongText
   ticketdata         String @default("{\"logChannel\": \"false\",\"categories\": {\"open\": \"false\",\"closed\": \"false\"},\"supportRole\": \"false\",\"message\": \"false\",\"transcripts\": \"false\"}") @db.LongText
   membercountchannel String @default("false")
   wishlistchannel    String @default("false")
@@ -60,7 +62,7 @@ model ticketdata {
   guildId         String
   id              Int
   userId          String
-  channelID       String  @default("") @unique(map: "channelID")
+  channelID       String  @unique(map: "channelID") @default("")
   ticketReason    String  @default("")
   open            Boolean @default(true)
   users           String  @default("[]")

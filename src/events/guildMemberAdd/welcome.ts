@@ -30,30 +30,32 @@ export default async (client: Client, member: GuildMember) => {
 
   const text = member.user.username
 
-  ctx.fillStyle = "#0d0d0d";
+  ctx.fillStyle = settings.joinimage.backgroundColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const cat = await Canvas.loadImage(
-    "src/assets/images/Happy.png"
-  );
+  if (settings.joinimage.image.startsWith("http")) {
+    const cat = await Canvas.loadImage(settings.joinimage.image);
 
-  ctx.drawImage(cat, 0, canvas.height - 100, 100, 100);
-  //flip cat image horizontally and put it on the left side
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(cat, -700, canvas.height - 200, 200, 200);
-  ctx.restore();
+    ctx.drawImage(cat, 0, canvas.height - 100, 100, 100);
 
-  ctx.shadowColor = "#7c4b8b";
-  ctx.shadowBlur = 8;
-  ctx.shadowOffsetX = 5;
-  ctx.shadowOffsetY = 5;
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(cat, -700, canvas.height - 200, 200, 200);
+    ctx.restore();
+  }
+
+  if (settings.joinimage.shadow === "true") {
+    ctx.shadowColor = settings.joinimage.shadowColor;
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+  }
 
   ctx.font = "45px NexaScript";
-  ctx.fillStyle = "#f0ccfb";
+  ctx.fillStyle = settings.joinimage.textColor;
   ctx.fillText("Welcome", canvas.width / 2.75, canvas.height / 2.25);
   ctx.font = applyText(canvas, text);
-  ctx.fillStyle = "#f0ccfb";
+  ctx.fillStyle = settings.joinimage.textColor;
   ctx.fillText(text, canvas.width / 2.75, canvas.height / 1.5);
 
   ctx.shadowColor = "transparent";
