@@ -39,9 +39,19 @@ model settings {
   ticketId           Int    @default(0)
 }
 
+model reactionroles {
+  guildId     String
+  roleId      String
+  description String
+  group       String
+
+  @@unique([guildId, group], map: "Identifier")
+}
+
 model levels {
   guildId   String
   userId    String
+  username  String @default("Unkown User")
   level     Int    @default(1)
   xp        Int    @default(0)
   xp_needed Int    @default(66)
@@ -50,7 +60,7 @@ model levels {
 }
 
 model level_rewards {
-  guildId String @unique(map: "guildId")
+  guildId String
   level   Int
   role    String
   message String

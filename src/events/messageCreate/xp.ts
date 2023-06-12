@@ -1,6 +1,6 @@
 import { ChannelType, Client, Collection, Message } from "discord.js";
 import rewards from "~/config/rewards.json";
-import { addXp } from "~/functions/database";
+import prisma, { addXp } from "~/functions/database";
 
 const xpCooldowns = new Collection<string, number>();
 
@@ -20,20 +20,31 @@ export default async (client: Client, message: Message) => {
 
   try {
     ;
-    const newXp = await addXp(userId, message.guild!.id, xpAmount);
+    const newXp = await addXp(message.author, message.guild!.id, xpAmount);
     if (newXp.leveledUp) {
-      const user = client.users.cache.get(userId);
-      const reward = rewards[String(newXp.leveledUp) as keyof typeof rewards];
+      const reward = await prisma.level_rewards.findUnique({
+        where: {
+          guildId_level: {
+            guildId: message.guild!.id,
+            level: newXp.newLevel,
+          },
+        },
+      });
       if (reward) {
         const role = message.guild?.roles.cache.get(reward.role);
         if (role) {
           message.member?.roles.add(role);
         }
         if (reward.message) {
-          message.channel.send(reward.message.replace('{user}', user?.toString() || ''));
+          message.channel.send(reward.message
+            .replace("{USER MENTION}", `<@${message.author.id}>`)
+            .replace("{USERNAME}", message.author.username)
+            .replace("{SERVER NAME}", message.guild!.name)
+            .replace("{LEVEL}", newXp.newLevel.toString())
+            );
         }
       }
-      message.channel.send(`Congratulations ${user!.username}! You have leveled up to level ${newXp.newLevel}!`);
+      message.channel.send(`Congratulations ${message.author!.username}! You have leveled up to level ${newXp.newLevel}!`);
     }
   } catch (err) {
     logger.error(err);

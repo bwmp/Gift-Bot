@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { User } from "discord.js";
 import { join_leaveMessage, joinleaveImage, ticketdata } from "~/interfaces/database";
 
 const prisma = new PrismaClient();
@@ -56,20 +57,21 @@ export async function deleteLicenseKey(licenseKey: string) {
     });
 }
 
-export async function addXp(userId: string, guildId: string, xp: number) {
+export async function addXp(member: User, guildId: string, xp: number) {
     const result = { leveledUp: false, newLevel: 0 };
 
     await prisma.$transaction(async (tx) => {
         let user = await tx.levels.upsert({
             where: {
                 userId_guildId: {
-                    userId: userId,
+                    userId: member.id,
                     guildId: guildId,
                 },
             },
             create: {
                 guildId: guildId,
-                userId: userId,
+                userId: member.id,
+                username: member.username,
                 xp: xp,
                 level: 1,
             },
@@ -77,6 +79,7 @@ export async function addXp(userId: string, guildId: string, xp: number) {
                 xp: {
                     increment: xp,
                 },
+                username: member.username,
             },
         });
 
@@ -88,7 +91,7 @@ export async function addXp(userId: string, guildId: string, xp: number) {
             await tx.levels.update({
                 where: {
                     userId_guildId: {
-                        userId: userId,
+                        userId: member.id,
                         guildId: guildId,
                     },
                 },
@@ -96,6 +99,7 @@ export async function addXp(userId: string, guildId: string, xp: number) {
                     xp: 0,
                     level: newLevel,
                     xp_needed: newXpNeeded,
+                    username: member.username,
                 },
             });
 
