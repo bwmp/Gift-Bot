@@ -27,14 +27,13 @@ export const close: Button = {
       return;
     }
 
-    if(!ticketInfo.open){
+    if (!ticketInfo.open) {
       interaction.editReply({
         content: 'This ticket is already closed!'
       });
       return;
     }
-
-    if (ticketInfo.userId !== interaction.user.id || !isSupport) {
+    if (ticketInfo.userId !== interaction.user.id && !isSupport) {
       interaction.editReply({
         content: 'You cannot close this ticket!'
       });
@@ -94,29 +93,29 @@ export const close: Button = {
       components: [row]
     });
 
-    const ogMsg = await interaction.channel!.messages.fetch(ticketInfo.originalMessage);
+    const channel = interaction.channel as TextChannel;
+
+    const ogMsg = await channel.messages.fetch(ticketInfo.originalMessage);
 
     await ogMsg.edit({
       components: [ogmsgRow]
     });
 
-    const channel = await interaction.guild!.channels.fetch(ticketInfo.channelID);
-
     let parent = null;
-    if (settings.ticketdata.categories.closed == "false"){
-        parent = null
-    }else{
-        parent = await interaction.guild!.channels.fetch(settings.ticketdata.categories.closed) as CategoryChannel | undefined;
+    if (settings.ticketdata.categories.closed == "false") {
+      parent = null
+    } else {
+      parent = await interaction.guild!.channels.fetch(settings.ticketdata.categories.closed) as CategoryChannel | undefined;
     }
 
-    channel?.edit({
+    channel.edit({
       parent: parent ? parent.id : null,
     });
 
     let LogChannel = null;
-    if (settings.ticketdata.logChannel == "false"){
+    if (settings.ticketdata.logChannel == "false") {
       LogChannel = null
-    }else{
+    } else {
       LogChannel = await interaction.guild!.channels.fetch(settings.ticketdata.logChannel) as TextChannel;
     }
 
@@ -149,18 +148,39 @@ export const close: Button = {
     const creator = interaction.guild!.members.cache.get(ticketInfo.userId);
 
     if (creator) {
-      await creator.send({
-        embeds: [embed],
-        files: [transcript]
+      try {
+        const dmChannel = await creator.createDM();
+        await dmChannel.send({
+          embeds: [embed],
+          files: [transcript]
+        });
+      } catch (error) {
+        interaction.channel?.send(`Couldn't DM ${creator?.user.tag}`)
+      }
+      channel.permissionOverwrites.edit(creator, {
+        ViewChannel: false,
+        SendMessages: false,
+        ReadMessageHistory: false,
       });
     }
 
     users.forEach(async (user: string) => {
-      interaction.guild!.members.cache.get(user)?.send({
-        embeds: [embed],
-        files: [transcript]
+      const member = interaction.guild!.members.cache.get(user)
+
+      try {
+        const dmChannel = await member?.createDM();
+        await dmChannel?.send({
+          embeds: [embed],
+          files: [transcript]
+        });
+      } catch (error) {
+        interaction.channel?.send(`Couldn't DM ${member?.user.tag}`)
+      }
+      channel.permissionOverwrites.edit(member!, {
+        ViewChannel: false,
+        SendMessages: false,
+        ReadMessageHistory: false,
       });
     });
-
   }
 }
