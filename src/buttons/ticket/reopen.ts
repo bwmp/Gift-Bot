@@ -29,11 +29,13 @@ export const reopen: Button = {
       return;
     }
 
+    const users = JSON.parse(ticketInfo.users);
+
     const supportRole = await interaction.guild!.roles.fetch(settings.ticketdata.supportRole);
     const member = interaction.member as GuildMember;
     const isSupport = supportRole?.members.some(member => member.id === interaction.user.id) || member.permissions.has(PermissionsBitField.Flags.Administrator);
 
-    if (ticketInfo.userId !== interaction.user.id || !isSupport) {
+    if (!isSupport) {
       interaction.editReply({
         content: 'You cannot reopen this ticket!'
       });
@@ -64,7 +66,7 @@ export const reopen: Button = {
           .setStyle(ButtonStyle.Danger)
           .setDisabled(false)
       ])
-    const originalMessage = await interaction.channel?.messages.fetch(ticketInfo.originalMessage) as Message;
+    const originalMessage = await interaction.channel!.messages.fetch(ticketInfo.originalMessage) as Message;
     await originalMessage.edit({
       components: [ogmsgRow]
     });
@@ -92,24 +94,24 @@ export const reopen: Button = {
 
     await interaction.message.delete();
 
-    const channel = await interaction.guild!.channels.fetch(ticketInfo.channelID);
+    const channel = interaction.guild!.channels.cache.get(ticketInfo.channelID) as TextChannel;
 
     let parent = null;
-    if (settings.ticketdata.categories.open == "false"){
-        parent = null
-    }else{
-        parent = await interaction.guild!.channels.fetch(settings.ticketdata.categories.open) as CategoryChannel | undefined;
+    if (settings.ticketdata.categories.open == "false") {
+      parent = null
+    } else {
+      parent = interaction.guild!.channels.cache.get(settings.ticketdata.categories.open) as CategoryChannel | undefined;
     }
 
-    channel?.edit({
+    await channel.edit({
       parent: parent ? parent.id : null,
     });
 
     let LogChannel = null;
-    if (settings.ticketdata.logChannel == "false"){
+    if (settings.ticketdata.logChannel == "false") {
       LogChannel = null
-    }else{
-      LogChannel = await interaction.guild!.channels.fetch(settings.ticketdata.logChannel) as TextChannel;
+    } else {
+      LogChannel = interaction.guild!.channels.cache.get(settings.ticketdata.logChannel) as TextChannel;
     }
 
     const logEmbed = new EmbedBuilder()
@@ -130,6 +132,19 @@ export const reopen: Button = {
       )
       .setColor('#00ff00')
       .setTimestamp();
+
+    users.push(ticketInfo.userId);
+
+    const permissionOverwrites = users.map((user: string) => ({
+      id: user,
+      allow: [
+        PermissionsBitField.Flags.ViewChannel,
+        PermissionsBitField.Flags.SendMessages,
+        PermissionsBitField.Flags.ReadMessageHistory
+      ]
+    }));
+
+    await channel.permissionOverwrites.set(permissionOverwrites);
 
     await LogChannel?.send({
       embeds: [logEmbed]
