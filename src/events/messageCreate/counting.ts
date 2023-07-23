@@ -20,16 +20,25 @@ export default async (client: Client, message: Message) => {
   if (Number.isNaN(number)) return;
 
   const { counting } = await getSettings(message.guild!.id);
-  console.log("check1")
+
   if (counting.channel != message.channel.id) return;
-  console.log("check2")
+
   if((counting.count += 1) != number) {
     message.react("❌");
     const msg = messages[Math.floor(Math.random() * messages.length)].replace("{NUMBER}", counting.count.toString()).replace("{MAX}", counting.maxcount.toString())
     message.reply({content: msg})
+    counting.count = 0;
+    await prisma.settings.update({
+      where: {
+        guildId: message.guild!.id
+      },
+      data: {
+        counting: JSON.stringify(counting)
+      }
+    })
     return;
   }
-  console.log("check3")
+
   counting.count = number;
   if(number > counting.maxcount) counting.maxcount = number;
   await prisma.settings.update({
