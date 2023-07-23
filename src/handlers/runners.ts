@@ -5,12 +5,11 @@ export default async (client: Client) => {
   setInterval(async () => {
     client.guilds.cache.forEach(async (guild) => {
       const settings = await getSettings(guild.id);
-      if (settings.membercountchannel == "false") return;
-      const MemberCountChannel = await client.channels.fetch(settings.membercountchannel) as TextChannel | VoiceChannel | StageChannel;
-      const count = MemberCountChannel.name.replace('Members: ', '');
-      const newCount = guild?.memberCount.toString();
-      if (count == newCount) return;
-      MemberCountChannel.setName(`Members: ${newCount}`, 'Member count update');
+      if (settings.membercount.channel == "false") return;
+      const MemberCountChannel = await client.channels.fetch(settings.membercount.channel) as TextChannel | VoiceChannel | StageChannel;
+      const newName = settings.membercount.text.replace("{COUNT}", guild?.memberCount.toString());
+      if(MemberCountChannel.name == newName) return;
+      MemberCountChannel.setName(newName, 'Member count update');
     });
   }, 60000)
 };

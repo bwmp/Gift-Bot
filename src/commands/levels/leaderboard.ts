@@ -7,7 +7,7 @@ export const leaderboard: Command = {
     category: "levels",
     guildOnly: true,
     execute: async function (interaction, args) {
-        const rows = await getTopUsers(interaction.guild!.id, 10);
+        const rows = await getTopUsers(interaction.guild!.id, 10, 1);
         const fields = [];
 
         const embed = new EmbedBuilder()

@@ -22,21 +22,27 @@ model sessions {
 }
 
 model licenses {
-  license_key String @unique(map: "licenseKey")
+  license_key String  @unique
   userId      String
   product     String
+  hwid        String  @default("none")
+  bypass      Boolean @default(false)
+
+  @@unique([hwid, product], map: "Identifier1")
+  @@unique([userId, product], map: "Identifier2")
 }
 
 model settings {
-  guildId            String @unique(map: "guildId")
-  leavemessage       String @default("{\"message\":\"\",\"channel\":\"false\"}")
-  leaveimage         String @default("{\"backgroundColor\":\"#0d0d0d\",\"image\":\"\",\"textColor\":\"#f0ccfb\",\"shadow\":\"true\",\"shadowColor\":\"#7c4b8b\"}") @db.LongText
-  joinmessage        String @default("{\"message\":\"\",\"channel\":\"false\"}")
-  joinimage          String @default("{\"backgroundColor\":\"#0d0d0d\",\"image\":\"\",\"textColor\":\"#f0ccfb\",\"shadow\":\"true\",\"shadowColor\":\"#7c4b8b\"}") @db.LongText
-  ticketdata         String @default("{\"logChannel\": \"false\",\"categories\": {\"open\": \"false\",\"closed\": \"false\"},\"supportRole\": \"false\",\"message\": \"false\",\"transcripts\": \"false\"}") @db.LongText
-  membercountchannel String @default("false")
-  wishlistchannel    String @default("false")
-  ticketId           Int    @default(0)
+  guildId         String @unique(map: "guildId")
+  leavemessage    String @default("{\"message\":\"\",\"channel\":\"false\"}")
+  leaveimage      String @default("{\"backgroundColor\":\"#0d0d0d\",\"image\":\"\",\"textColor\":\"#f0ccfb\",\"shadow\":\"true\",\"shadowColor\":\"#7c4b8b\"}") @db.LongText
+  joinmessage     String @default("{\"message\":\"\",\"channel\":\"false\"}")
+  joinimage       String @default("{\"backgroundColor\":\"#0d0d0d\",\"image\":\"\",\"textColor\":\"#f0ccfb\",\"shadow\":\"true\",\"shadowColor\":\"#7c4b8b\"}") @db.LongText
+  ticketdata      String @default("{\"logChannel\": \"false\",\"categories\": {\"open\": \"false\",\"closed\": \"false\"},\"supportRole\": \"false\",\"message\": \"false\",\"transcripts\": \"false\"}") @db.LongText
+  membercount     String @default("{\"channel\": \"false\",\"text\": \"Members: {COUNT}\"}")
+  wishlistchannel String @default("false")
+  counting        String @default("{\"channel\": \"false\",\"countnumber\": \"1\",\"countmax\": \"1\"}") @db.LongText
+  ticketId        Int    @default(0)
 }
 
 model reactionroles {

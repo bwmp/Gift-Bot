@@ -6,7 +6,12 @@ export interface ticketdata {
   transcripts: string;
 }
 
-export interface join_leaveMessage {
+export interface memberCount{
+  channel: string;
+  text: string;
+}
+
+export interface joinleaveMessage {
   message: string;
   channel: string;
 }
@@ -17,4 +22,10 @@ export interface joinleaveImage {
   textColor: string;
   shadow: string;
   shadowColor: string;
+}
+
+export interface countingData {
+  channel: string;
+  count: number;
+  maxcount: number;
 }

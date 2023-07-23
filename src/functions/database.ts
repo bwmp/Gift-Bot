@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { User } from "discord.js";
-import { join_leaveMessage, joinleaveImage, ticketdata } from "~/interfaces/database";
+import { countingData, joinleaveMessage, joinleaveImage, memberCount, ticketdata } from "~/interfaces/database";
 
 const prisma = new PrismaClient();
 logger.info("Prisma client initialized");
@@ -16,16 +16,20 @@ export async function getSettings(guildId: string) {
         update: {},
     });
 
-    const joinmessage = JSON.parse(settings.joinmessage || '{}') as join_leaveMessage;
+    const joinmessage = JSON.parse(settings.joinmessage || '{}') as joinleaveMessage;
     const joinimage = JSON.parse(settings.joinimage || '{}') as joinleaveImage;
-    const leavemessage = JSON.parse(settings.leavemessage || '{}') as join_leaveMessage;
+    const leavemessage = JSON.parse(settings.leavemessage || '{}') as joinleaveMessage;
     const leaveimage = JSON.parse(settings.leaveimage || '{}') as joinleaveImage;
     const ticketdata = JSON.parse(settings.ticketdata || '{}') as ticketdata;
-    const membercountchannel = settings.membercountchannel
+    const membercount = JSON.parse(settings.membercount || '{}') as memberCount;
     const wishlistchannel = settings.wishlistchannel
+    let counting = JSON.parse(settings.counting || '{}');
+    counting.count = parseInt(counting.count) || 0;
+    counting.maxcount = parseInt(counting.maxcount) || 0;
+    counting = counting as countingData;
     const ticketId = settings.ticketId
 
-    return { joinmessage, joinimage, leavemessage, leaveimage, ticketdata, membercountchannel, wishlistchannel, ticketId };
+    return { joinmessage, joinimage, leavemessage, leaveimage, ticketdata, membercount, wishlistchannel, counting, ticketId };
 }
 
 export async function addLicenseKey(
@@ -60,7 +64,7 @@ export async function deleteLicenseKey(licenseKey: string) {
 export async function addXp(member: User, guildId: string, xp: number) {
     const result = { leveledUp: false, newLevel: 0 };
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
         let user = await tx.levels.upsert({
             where: {
                 userId_guildId: {
@@ -129,7 +133,7 @@ export async function getXp(userId: string, guildId: string) {
     return user;
 }
 
-export async function getTopUsers(guildId: string, limit: number) {
+export async function getTopUsers(guildId: string, amount: number, page: number) {
     const users = await prisma.levels.findMany({
         where: {
             guildId: guildId,
@@ -137,7 +141,8 @@ export async function getTopUsers(guildId: string, limit: number) {
         orderBy: {
             xp: "desc",
         },
-        take: limit,
+        skip: (page - 1) * amount,
+        take: amount,
     });
 
     return users;
