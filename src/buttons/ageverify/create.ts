@@ -13,11 +13,6 @@ export const create: Button = {
             return;
         }
 
-        if(!member?.roles.cache.has("968317142351118346")) {
-            interaction.reply({ content: "You are no eligable for verification.", ephemeral: true });
-            return;
-        }
-
         const parent = await interaction.guild!.channels.fetch(process.env.AGE_VERIFICATION_CATEGORY as string) as CategoryChannel | null;
 
         const ticketChannel = await interaction.guild!.channels.create({
