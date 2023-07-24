@@ -1,4 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CategoryChannel, ChannelType, EmbedBuilder, GuildMember, PermissionsBitField } from 'discord.js';
+import { ticket } from '~/commands/ticket/ticket';
 import { Button } from '~/types/objects';
 
 export const create: Button = {
@@ -54,5 +55,7 @@ export const create: Button = {
             embeds: [embed],
             components: [row]
         })
+
+        interaction.editReply({ content: `Your ticket has been created. <#${ticketChannel.id}>` });
     }
 }
