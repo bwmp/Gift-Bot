@@ -20,9 +20,8 @@ export const approve: Button = {
     }
 
     const verifiedRole = interaction.guild?.roles.cache.get("969015422160633866");
-    const unverifiedRole = interaction.guild?.roles.cache.get("968317142351118346");
 
-    if (!verifiedRole || !unverifiedRole) {
+    if (!verifiedRole) {
       interaction.editReply({ content: "Cannot find roles." });
       return;
     }
@@ -33,7 +32,6 @@ export const approve: Button = {
     }
 
     await target.roles.add(verifiedRole);
-    await target.roles.remove(unverifiedRole);
 
     interaction.editReply({ content: "user verified." });
 
