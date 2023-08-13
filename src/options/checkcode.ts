@@ -3,8 +3,8 @@ import { SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
 export default async function options(cmd: SlashCommandBuilder) {
     cmd.addStringOption(
         new SlashCommandStringOption()
-            .setName("license_key")
-            .setDescription("The license key to get user by.")
+            .setName("code")
+            .setDescription("the code to check.")
             .setRequired(true)
     )
 }

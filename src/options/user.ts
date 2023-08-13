@@ -4,7 +4,7 @@ export default async function options(cmd: SlashCommandBuilder) {
     cmd.addUserOption(
         new SlashCommandUserOption()
             .setName("user")
-            .setDescription("the user to remove from the ticket.")
+            .setDescription("the users whos codes you want to check.")
             .setRequired(true)
     )
 }

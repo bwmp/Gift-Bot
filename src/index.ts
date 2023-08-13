@@ -18,12 +18,7 @@ const client = new Client({
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.GuildMembers,
-		GatewayIntentBits.GuildModeration,
-		GatewayIntentBits.GuildPresences,
-		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.DirectMessages,
-		GatewayIntentBits.GuildVoiceStates,
-		GatewayIntentBits.MessageContent,
 	],
 	allowedMentions: {
 		parse: ['users', 'roles', 'everyone'],
@@ -38,9 +33,9 @@ declare global {
 
 function sleepfunc(ms: number) {
 	return new Promise(resolve => {
-	  return setTimeout(resolve, ms);
+		return setTimeout(resolve, ms);
 	});
-  }
+}
 global.sleep = sleepfunc;
 
 for (const handlerName of readdirSync('./src/handlers').filter((file: string) => file.endsWith('.ts'))) require(`./handlers/${handlerName}`).default(client);

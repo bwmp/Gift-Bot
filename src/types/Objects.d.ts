@@ -13,34 +13,9 @@ export class Command {
   cooldown?: number;
   ephemeral?: boolean;
   noDefer?: boolean;
-  ownerOnly?: boolean;
   options?: (cmd: SlashCommandBuilder) => void | Promise<void>;
   autoComplete?: (client: Client, interaction: AutocompleteInteraction) => void | Promise<void>;
   execute: (interaction: CommandInteraction, args: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">) => void | Promise<void>;
-}
-
-export class ContextMenuCommand<T extends 'User' | 'Message'> {
-  name: string;
-  permissions?: (keyof typeof PermissionsBitField.Flags)[];
-  botPerms?: (keyof typeof PermissionsBitField.Flags)[];
-  ephemeral?: boolean;
-  noDefer?: boolean;
-  type: T;
-  execute: (interaction: ContextMenuCommandInteraction, client: Client, item: T extends 'User' ? GuildMember : Message<true>) => void | Promise<void>;
-}
-
-export class Reaction {
-  name?: string;
-  triggers: string[];
-  additionaltriggers?: string[];
-  execute: (message: Message<true>) => void | Promise<void>;
-}
-
-export class Modal {
-  name?: string;
-  deferReply?: boolean;
-  ephemeral?: boolean;
-  execute: (interaction: ModalSubmitInteraction, args: ModalSubmitFields) => void | Promise<void>;
 }
 
 export class Button {

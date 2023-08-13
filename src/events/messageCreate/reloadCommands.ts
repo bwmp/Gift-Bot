@@ -13,7 +13,6 @@ export default async (client: Client, message: Message) => {
     if (!client.application.owner) await client.application.fetch();
 
     let cmds = [];
-    let ownerOnly = [];
     for (let obj of commands) {
       const command = obj[1];
       logger.info(`Loading command ${command.name}`);
@@ -22,18 +21,12 @@ export default async (client: Client, message: Message) => {
         .setName(command.name!)
         .setDescription(truncateString(command.description, 99));
       if (command.options) command.options(cmd);
-      if (command.ownerOnly) {
-        ownerOnly.push(cmd);
-      } else {
-        cmds.push(cmd);
-      }
+      cmds.push(cmd);
     }
     await client.guilds.cache
       .get(process.env.GUILDID!)
-      ?.commands.set(ownerOnly);
-    await client.application?.commands.set(cmds);
-    logger.info(`${cmds.length} global slash commands loaded`);
-    logger.info(`${ownerOnly.length} owner only slash commands loaded`);
+      ?.commands.set(cmds);
+    logger.info(`${cmds.length} commands loaded`);
     message.reply("Reloaded commands");
   }
 };
