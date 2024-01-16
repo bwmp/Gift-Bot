@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Oli-idk/Bot-Template.git"
+    "url": "git+https://github.com/bwmp/Bot-Template.git"
   },
   "keywords": [
     "discord.js",
@@ -22,9 +22,9 @@
   "author": "AkiraDev, Saboor",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/Oli-idk/Bot-Template/issues"
+    "url": "https://github.com/bwmp/Bot-Template/issues"
   },
-  "homepage": "https://github.com/Oli-idk/Bot-Template#readme",
+  "homepage": "https://github.com/bwmp/Bot-Template#readme",
   "devDependencies": {
     "@types/node": "^20.1.1",
     "discord.js": "^14.11.0",
